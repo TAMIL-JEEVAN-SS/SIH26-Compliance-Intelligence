@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "gOzTSA4WrDLVwi4BoXVuY"
+uri = "file://VSC-copy-paste.txt"
+type = "text"
+title = "VSC copy-paste project export"
+description = "Complete plain-text export of the application source, API contract, generated client code, configuration, and documentation. Recreate each FILE section at its stated relative path."
+logical_id = "ef5c85a2-ee46-49be-a368-3e5752902a40"
+content_hash = "sha256:1f4af99af8adda2efefdf99e7b58c0df4f0921e4a8e27abb122cfd8635b047d1"
+size = 371945
+mtime_ms = 1788640193242
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:8d6f28ff-1009-46ed-958f-581bbe4dac9d/ef5c85a2-ee46-49be-a368-3e5752902a40/57645464-0340-4fd0-b969-9d94fa20900d"
+storage_version_token = "1788640198087195"
+content_type = "text/plain"
