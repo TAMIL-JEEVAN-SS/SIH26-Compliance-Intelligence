@@ -3,13 +3,19 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Compliance Intelligence Command API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: institutes
+    description: Funded institute monitoring operations
+  - name: monitoring
+    description: Continuous monitoring and anomaly detection
+  - name: inspections
+    description: Surprise inspection assignment and submission operations
 paths:
   /healthz:
     get:
@@ -24,6 +30,160 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /health:
+    get:
+      operationId: healthCheckDashboard
+      tags: [health]
+      summary: Dashboard health check
+      description: Returns server health status for the dashboard route
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /institutes:
+    get:
+      operationId: listInstitutes
+      tags: [institutes]
+      summary: List institutes by risk priority
+      description: Returns all monitored institutes sorted from highest to lowest risk score
+      responses:
+        "200":
+          description: Institutes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Institute"
+  /institutes/{id}:
+    get:
+      operationId: getInstitute
+      tags: [institutes]
+      summary: Get an institute
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Institute
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Institute"
+        "404":
+          description: Institute not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /monitor/{id}:
+    post:
+      operationId: runMonitoring
+      tags: [monitoring]
+      summary: Run AI-assisted monitoring
+      description: Simulates an AI attendance observation, calculates discrepancy, and updates institute risk
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitoringInput"
+      responses:
+        "200":
+          description: Monitoring result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitoringResult"
+        "404":
+          description: Institute not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /inspections/generate:
+    post:
+      operationId: generateInspection
+      tags: [inspections]
+      summary: Generate a surprise inspection
+      description: Selects the highest-priority eligible institute and an available inspector
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InspectionGenerateInput"
+      responses:
+        "201":
+          description: Inspection created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inspection"
+        "409":
+          description: No institute is eligible or no inspector is available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /inspections:
+    get:
+      operationId: listInspections
+      tags: [inspections]
+      summary: List inspections
+      description: Returns inspection records in newest-first order
+      responses:
+        "200":
+          description: Inspections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Inspection"
+  /inspections/{id}/submit:
+    post:
+      operationId: submitInspection
+      tags: [inspections]
+      summary: Submit inspection findings
+      description: Records GPS and evidence metadata, then updates risk based on confirmation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InspectionSubmission"
+      responses:
+        "200":
+          description: Inspection submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectionSubmitResult"
+        "404":
+          description: Inspection not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +193,174 @@ components:
           type: string
       required:
         - status
+    Institute:
+      type: object
+      required:
+        - id
+        - name
+        - location
+        - reportedAttendance
+        - observedAttendance
+        - riskScore
+        - riskLevel
+        - status
+        - historyRisk
+        - reportingRisk
+        - complianceRisk
+        - alertRisk
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        location:
+          type: string
+        reportedAttendance:
+          type: number
+        observedAttendance:
+          type: ["number", "null"]
+        riskScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        riskLevel:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        status:
+          type: string
+          enum: [MONITORING, INSPECTION_REQUIRED, INSPECTION_ASSIGNED, NON_COMPLIANT]
+        historyRisk:
+          type: number
+        reportingRisk:
+          type: number
+        complianceRisk:
+          type: number
+        alertRisk:
+          type: number
+        lastMonitoredAt:
+          type: ["string", "null"]
+          format: date-time
+    MonitoringInput:
+      type: object
+      required:
+        - observedAttendance
+      properties:
+        observedAttendance:
+          type: number
+          minimum: 0
+    MonitoringResult:
+      type: object
+      required:
+        - institute
+        - discrepancy
+        - anomalyDetected
+        - anomalySeverity
+        - attendanceRisk
+        - previousRiskScore
+        - riskScore
+        - riskLevel
+      properties:
+        institute:
+          $ref: "#/components/schemas/Institute"
+        discrepancy:
+          type: number
+        anomalyDetected:
+          type: boolean
+        anomalySeverity:
+          type: string
+          enum: [NORMAL, LOW, MODERATE, SERIOUS, SEVERE]
+        attendanceRisk:
+          type: number
+        previousRiskScore:
+          type: number
+        riskScore:
+          type: number
+        riskLevel:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+    InspectionGenerateInput:
+      type: object
+      properties:
+        instituteId:
+          type: string
+    Inspection:
+      type: object
+      required:
+        - id
+        - institute
+        - inspector
+        - reason
+        - riskScore
+        - assignmentStatus
+        - timestamp
+        - confirmed
+        - latitude
+        - longitude
+        - evidence
+        - notes
+      properties:
+        id:
+          type: string
+        institute:
+          $ref: "#/components/schemas/Institute"
+        inspector:
+          type: string
+        reason:
+          type: string
+        riskScore:
+          type: number
+        assignmentStatus:
+          type: string
+          enum: [ASSIGNED, SUBMITTED]
+        timestamp:
+          type: string
+          format: date-time
+        confirmed:
+          type: ["boolean", "null"]
+        notes:
+          type: ["string", "null"]
+        latitude:
+          type: ["number", "null"]
+        longitude:
+          type: ["number", "null"]
+        evidence:
+          type: ["string", "null"]
+    InspectionSubmission:
+      type: object
+      required:
+        - confirmed
+      properties:
+        confirmed:
+          type: boolean
+        notes:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        evidence:
+          type: string
+    InspectionSubmitResult:
+      type: object
+      required:
+        - inspection
+        - institute
+        - riskDelta
+        - escalationRequired
+      properties:
+        inspection:
+          $ref: "#/components/schemas/Inspection"
+        institute:
+          $ref: "#/components/schemas/Institute"
+        riskDelta:
+          type: number
+        escalationRequired:
+          type: boolean
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
 

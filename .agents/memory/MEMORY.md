@@ -1,0 +1,1 @@
+- [API contract Zod compatibility](api-contract-zod-compatibility.md) — use numeric schemas until generated integer validators match the workspace Zod version.

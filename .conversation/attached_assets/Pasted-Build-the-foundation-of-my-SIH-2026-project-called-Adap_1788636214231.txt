@@ -1,0 +1,838 @@
+Build the foundation of my SIH 2026 project called:
+
+**Adaptive Compliance Intelligence & Surprise Inspection Platform**
+
+This is an AI-assisted continuous monitoring platform for DoSJE-funded institutes, projects and NGOs.
+
+## CORE PRODUCT LOOP
+
+The entire application must implement this single loop:
+
+**Monitor → Detect anomaly → Calculate risk → Prioritize → Trigger surprise inspection → Inspector verifies GPS/evidence → Update risk → Escalate**
+
+Do NOT build disconnected demo pages. Everything must use the same institute data, risk engine, inspection data and API.
+
+---
+
+# PHASE 1 — BUILD ONLY THE FOUNDATION
+
+For this first phase, create a working full-stack application with:
+
+- React + Vite frontend
+- Node.js + Express backend
+- REST API
+- JavaScript/TypeScript risk engine
+- Mock/in-memory data initially
+- Responsive UI
+- Clean architecture so Supabase can be added later
+- GitHub-compatible project structure
+- Replit-compatible startup configuration
+
+Do NOT add authentication, real CCTV, real YOLO inference, advanced ML, blockchain, video conferencing, or complex GIS yet.
+
+The first objective is:
+
+**I must be able to open the Replit application and see a functioning government monitoring dashboard connected to the Express backend.**
+
+---
+
+# PROJECT STRUCTURE
+
+Create this structure:
+
+```text
+sih26-compliance/
+│
+├── package.json
+├── server.js
+├── .env.example
+├── .gitignore
+├── README.md
+│
+├── services/
+│   ├── riskEngine.js
+│   └── inspectionEngine.js
+│
+├── data/
+│   └── mockData.js
+│
+├── public/
+│
+└── client/
+    ├── package.json
+    ├── index.html
+    └── src/
+        ├── main.jsx
+        ├── App.jsx
+        ├── api.js
+        └── index.css
+```
+
+If you think a slightly different structure is technically better, keep it simple and explain the change.
+
+---
+
+# BACKEND
+
+Create an Express server.
+
+It must expose:
+
+```text
+GET  /api/health
+GET  /api/institutes
+GET  /api/institutes/:id
+POST /api/monitor/:id
+POST /api/inspections/generate
+GET  /api/inspections
+POST /api/inspections/:id/submit
+```
+
+The frontend must communicate with the backend through these APIs.
+
+Do not hardcode institute information directly into React components.
+
+---
+
+# MOCK INSTITUTES
+
+Create at least these institutes:
+
+1. Saksham Rehabilitation Centre
+2. Sunrise Care Institute
+3. Hope Foundation
+4. Aarohan NGO
+5. Seva Foundation
+
+Every institute must contain:
+
+```text
+id
+name
+location
+reportedAttendance
+observedAttendance
+riskScore
+riskLevel
+status
+historyRisk
+reportingRisk
+complianceRisk
+alertRisk
+```
+
+The API must return the institutes sorted by descending risk score.
+
+---
+
+# HERO CASE
+
+The main demonstration institute is:
+
+**Saksham Rehabilitation Centre**
+
+Initial state:
+
+```text
+Risk Score: 42
+Risk Level: LOW
+Reported Attendance: 86
+Observed Attendance: 0 or unavailable
+Status: MONITORING
+```
+
+When monitoring is executed, simulate the AI observation:
+
+```text
+Reported Attendance = 86
+AI Observed Attendance = 41
+```
+
+Calculate:
+
+```text
+discrepancy =
+abs(reported - observed) / reported * 100
+```
+
+Expected result:
+
+```text
+52.3%
+```
+
+---
+
+# RISK ENGINE
+
+Create:
+
+```text
+services/riskEngine.js
+```
+
+The risk score must be 0–100.
+
+Use five components:
+
+```text
+Attendance anomaly       maximum 35
+Historical behaviour     maximum 15
+Reporting inconsistency  maximum 13
+Compliance                maximum 10
+Alerts                    maximum 8
+```
+
+Maximum:
+
+```text
+35 + 15 + 13 + 10 + 8 = 81
+```
+
+For the hero case:
+
+```text
+Attendance Risk = 35
+Historical Risk = 15
+Reporting Risk = 13
+Compliance Risk = 10
+Alert Risk = 8
+
+TOTAL = 81
+```
+
+Therefore:
+
+```text
+42 → 81
+```
+
+after monitoring.
+
+Risk levels:
+
+```text
+0–29    LOW
+30–59   MEDIUM
+60–79   HIGH
+80–100  CRITICAL
+```
+
+Return both:
+
+```text
+riskScore
+riskLevel
+```
+
+from the risk engine.
+
+---
+
+# ANOMALY THRESHOLDS
+
+Implement:
+
+```text
+discrepancy < 10%       normal
+10–19.9%                low anomaly
+20–34.9%                moderate anomaly
+35–49.9%                serious anomaly
+>= 50%                  severe anomaly
+```
+
+Any discrepancy >= 20% must generate an anomaly event.
+
+The monitoring API should return:
+
+```json
+{
+  "discrepancy": 52.3,
+  "anomalyDetected": true,
+  "attendanceRisk": 35,
+  "riskScore": 81,
+  "riskLevel": "CRITICAL"
+}
+```
+
+---
+
+# INSPECTION PRIORITY
+
+Institutes with:
+
+```text
+risk >= 80
+```
+
+must be treated as critical.
+
+Institutes with:
+
+```text
+risk >= 60
+```
+
+must be eligible for inspection.
+
+The dashboard must sort institutes from highest to lowest risk.
+
+The inspection system must prioritize higher-risk institutes.
+
+For the MVP, use:
+
+```text
+70% risk-weighted selection
+30% random selection
+```
+
+but keep the implementation simple and deterministic enough for the hero demo.
+
+---
+
+# INSPECTORS
+
+Create mock inspectors:
+
+```text
+PMU-07
+PMU-12
+PMU-21
+```
+
+All should initially be available.
+
+When an inspection is generated:
+
+1. Select the highest-priority eligible institute.
+2. Randomly select one available inspector.
+3. Create an inspection record.
+4. Set institute status to:
+
+```text
+INSPECTION_ASSIGNED
+```
+
+Return:
+
+```text
+inspection ID
+institute
+inspector
+reason
+risk score
+assignment status
+timestamp
+```
+
+---
+
+# INSPECTION SUBMISSION
+
+Create an endpoint:
+
+```text
+POST /api/inspections/:id/submit
+```
+
+It should accept:
+
+```text
+confirmed
+notes
+latitude
+longitude
+evidence
+```
+
+If:
+
+```text
+confirmed = true
+```
+
+increase the institute risk score by:
+
+```text
++13
+```
+
+For the hero case:
+
+```text
+81 → 94
+```
+
+Then:
+
+```text
+94 = CRITICAL
+status = NON_COMPLIANT
+```
+
+If the inspection does NOT confirm the anomaly:
+
+```text
+risk = risk - 20
+```
+
+with a minimum of 0.
+
+---
+
+# FRONTEND
+
+Build a professional government-style dashboard.
+
+The UI should contain:
+
+## 1. Header
+
+Title:
+
+```text
+Compliance Intelligence Command
+```
+
+Subtitle:
+
+```text
+AI-Assisted Continuous Monitoring & Adaptive Surprise Inspection Platform
+```
+
+---
+
+## 2. Risk Summary
+
+Show:
+
+```text
+CRITICAL
+HIGH
+MEDIUM
+LOW
+```
+
+with counts.
+
+---
+
+## 3. Inspection Priority Queue
+
+Display institutes sorted by risk.
+
+Example:
+
+```text
+CRITICAL
+Saksham Rehabilitation Centre       81
+
+HIGH
+Sunrise Care Institute              73
+Hope Foundation                      68
+
+MEDIUM
+Aarohan NGO                          47
+
+LOW
+Seva Foundation                     21
+```
+
+Clicking an institute should select it.
+
+---
+
+# HERO INSTITUTE PANEL
+
+When Saksham is selected, display:
+
+```text
+Saksham Rehabilitation Centre
+
+Risk Score
+42 / 100
+
+Risk Level
+LOW
+
+Reported Attendance
+86
+
+AI Observed Attendance
+—
+
+Status
+MONITORING
+```
+
+Button:
+
+```text
+RUN MONITORING
+```
+
+When clicked:
+
+1. Call `/api/monitor/:id`.
+2. Send observed attendance = 41.
+3. Display:
+
+```text
+Reported Attendance: 86
+AI Observed Attendance: 41
+
+Discrepancy: 52.3%
+
+ANOMALY DETECTED
+```
+
+4. Animate or clearly show:
+
+```text
+42 → 81
+```
+
+5. Change risk level to:
+
+```text
+CRITICAL
+```
+
+6. Change status to:
+
+```text
+INSPECTION_REQUIRED
+```
+
+---
+
+# INSPECTION BUTTON
+
+When risk >= 60 show:
+
+```text
+GENERATE SURPRISE INSPECTION
+```
+
+Clicking it must call:
+
+```text
+POST /api/inspections/generate
+```
+
+Then show a prominent inspection card:
+
+```text
+SURPRISE INSPECTION GENERATED
+
+Institute:
+Saksham Rehabilitation Centre
+
+Inspector:
+PMU-07
+
+Reason:
+Attendance anomaly
+
+Risk:
+81
+
+Assignment:
+RANDOMIZED
+
+Status:
+ASSIGNED
+```
+
+---
+
+# INSPECTOR MOBILE VIEW
+
+Create a simple responsive inspector interface.
+
+It should show:
+
+```text
+Assigned Inspection
+
+Institute
+Risk
+Reason
+Inspector
+```
+
+Buttons:
+
+```text
+VERIFY GPS LOCATION
+TAKE / UPLOAD EVIDENCE
+SUBMIT INSPECTION
+```
+
+Use the browser:
+
+```javascript
+navigator.geolocation
+```
+
+for GPS.
+
+For the MVP, simply capture latitude and longitude and display:
+
+```text
+LOCATION VERIFIED
+```
+
+Do NOT implement sophisticated geofencing yet.
+
+---
+
+# EVIDENCE
+
+Use:
+
+```html
+<input
+  type="file"
+  accept="image/*"
+  capture="environment"
+/>
+```
+
+The MVP may temporarily store the evidence filename/reference in memory.
+
+Design the data model so it can later be connected to Supabase Storage.
+
+---
+
+# FINAL HERO FLOW
+
+The application must support this exact demo:
+
+```text
+Saksham Rehabilitation Centre
+        ↓
+Risk = 42
+        ↓
+RUN MONITORING
+        ↓
+Reported = 86
+Observed = 41
+        ↓
+Discrepancy = 52.3%
+        ↓
+ANOMALY DETECTED
+        ↓
+Risk = 81
+        ↓
+CRITICAL
+        ↓
+GENERATE SURPRISE INSPECTION
+        ↓
+Inspector PMU-07 assigned
+        ↓
+Inspector opens mobile view
+        ↓
+GPS verified
+        ↓
+Evidence submitted
+        ↓
+Attendance mismatch confirmed
+        ↓
+Risk = 94
+        ↓
+NON-COMPLIANT
+        ↓
+ESCALATION REQUIRED
+```
+
+---
+
+# IMPORTANT ARCHITECTURE RULE
+
+Keep these layers separate:
+
+```text
+Frontend
+   ↓
+REST API
+   ↓
+Risk Engine / Inspection Engine
+   ↓
+Data Layer
+```
+
+The risk calculation must NOT be embedded inside React components.
+
+The inspection selection logic must NOT be embedded inside React components.
+
+The frontend should only display data and call APIs.
+
+---
+
+# REPLIT REQUIREMENTS
+
+Make the application easy to run in Replit.
+
+Configure the root package so I can run the entire project with:
+
+```bash
+npm run dev
+```
+
+If necessary, use `concurrently` to start:
+
+```text
+Express backend
++
+Vite frontend
+```
+
+The application must bind correctly to:
+
+```text
+0.0.0.0
+```
+
+so it works through Replit's preview.
+
+Do not require localhost-specific assumptions.
+
+---
+
+# ENVIRONMENT VARIABLES
+
+Create:
+
+```text
+.env.example
+```
+
+with placeholders such as:
+
+```text
+PORT=3000
+VITE_API_URL=
+```
+
+Do NOT create real secrets.
+
+Do NOT put secrets in source code.
+
+---
+
+# GITHUB REQUIREMENTS
+
+Create a clean `.gitignore` containing:
+
+```text
+node_modules/
+.env
+dist/
+client/node_modules/
+client/dist/
+```
+
+Create a README explaining:
+
+1. What the project does.
+2. Architecture.
+3. How to install.
+4. How to run.
+5. API endpoints.
+6. Risk scoring.
+7. Hero demo.
+8. What is simulated.
+9. Future YOLO/Supabase integration.
+
+The repository must be ready to push to GitHub.
+
+---
+
+# QUALITY REQUIREMENTS
+
+Do not generate placeholder buttons that do nothing.
+
+Every button shown in the MVP must perform a real action.
+
+Do not create fake navigation that leads nowhere.
+
+Do not use unnecessary libraries.
+
+Do not introduce authentication yet.
+
+Do not introduce a complex database yet.
+
+Do not train an ML model.
+
+Do not implement real CCTV infrastructure.
+
+The goal is a working, understandable SIH-26 MVP.
+
+---
+
+# FIRST CHECKPOINT
+
+After creating the files, run the application.
+
+Verify:
+
+```text
+GET /api/health
+```
+
+works.
+
+Verify the dashboard loads.
+
+Verify institutes appear.
+
+Verify Saksham starts at risk 42.
+
+Verify:
+
+```text
+RUN MONITORING
+```
+
+changes:
+
+```text
+42 → 81
+```
+
+Verify:
+
+```text
+GENERATE SURPRISE INSPECTION
+```
+
+creates an inspection.
+
+Verify:
+
+```text
+SUBMIT INSPECTION
+```
+
+changes:
+
+```text
+81 → 94
+```
+
+Verify the dashboard reflects the updated state.
+
+If anything fails, debug and fix it before stopping.
+
+At the end, give me:
+
+1. The final file tree.
+2. The commands used to install dependencies.
+3. The command used to start the application.
+4. The URL/port I should open in Replit.
+5. A short explanation of how frontend → API → risk engine → inspection engine → data flow works.
+6. The exact next step required to add Supabase.
+7. The exact next step required to add real YOLO inference.
+
+Do not move to advanced features until this checkpoint works.

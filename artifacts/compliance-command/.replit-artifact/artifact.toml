@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Compliance Intelligence Command"
+description = "A government monitoring dashboard for DoSJE-funded institutes that detects attendance anomalies, prioritizes surprise inspections, and records inspector verification outcomes."
+version = "1.0.0"
+id = "artifacts/compliance-command"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24773
+
+[services.development]
+run = "pnpm --filter @workspace/compliance-command run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/compliance-command", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/compliance-command/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24773"
+BASE_PATH = "/"
