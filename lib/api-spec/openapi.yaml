@@ -256,6 +256,9 @@ components:
         - anomalyDetected
         - anomalySeverity
         - attendanceRisk
+         - confidence
+         - modelVersion
+         - inferenceTimestamp
         - previousRiskScore
         - riskScore
         - riskLevel
@@ -271,6 +274,15 @@ components:
           enum: [NORMAL, LOW, MODERATE, SERIOUS, SEVERE]
         attendanceRisk:
           type: number
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        modelVersion:
+          type: string
+        inferenceTimestamp:
+          type: string
+          format: date-time
         previousRiskScore:
           type: number
         riskScore:

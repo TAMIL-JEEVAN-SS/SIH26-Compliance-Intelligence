@@ -11,6 +11,7 @@ import {
 } from "@workspace/api-zod";
 import { getInstitute, institutes, inspections, sortedInstitutes } from "../data/mockData";
 import { generateInspection, submitInspection } from "../services/inspectionEngine";
+import { monitoringProvider } from "../services/monitoringProvider";
 import { calculateRisk } from "../services/riskEngine";
 
 const router: IRouter = Router();
@@ -38,9 +39,10 @@ router.post("/monitor/:id", (req, res) => {
     return;
   }
 
-  const result = calculateRisk(institute, observedAttendance);
+  const observation = monitoringProvider.observe({ institute, observedAttendance });
+  const result = calculateRisk(institute, observation.observedAttendance);
   const previousRiskScore = institute.riskScore;
-  institute.observedAttendance = observedAttendance;
+  institute.observedAttendance = observation.observedAttendance;
   institute.riskScore = result.riskScore;
   institute.riskLevel = result.riskLevel;
   institute.status = result.anomalyDetected ? "INSPECTION_REQUIRED" : "MONITORING";
@@ -48,6 +50,9 @@ router.post("/monitor/:id", (req, res) => {
 
   res.json({
     ...result,
+    confidence: observation.confidence,
+    modelVersion: observation.modelVersion,
+    inferenceTimestamp: observation.inferenceTimestamp,
     previousRiskScore,
     institute: { ...institute },
   });

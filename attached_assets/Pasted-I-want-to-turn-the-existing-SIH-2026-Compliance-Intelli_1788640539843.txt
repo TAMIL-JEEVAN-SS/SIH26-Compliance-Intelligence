@@ -1,0 +1,988 @@
+I want to turn the existing SIH 2026 Compliance Intelligence project into a polished, fully navigable MVP.
+
+IMPORTANT:
+DO NOT rebuild the project from scratch.
+DO NOT replace the existing architecture.
+DO NOT create a second application.
+Inspect the existing repository first and extend the current codebase.
+
+The existing architecture already contains:
+
+- React/Vite frontend
+- Express API
+- pnpm workspace
+- OpenAPI API contract
+- React Query API client
+- Zod schemas
+- riskEngine
+- inspectionEngine
+- mock data
+- dashboard page
+- inspector page
+
+Preserve these architecture decisions.
+
+==================================================
+PRODUCT
+==================================================
+
+Name:
+
+Adaptive Compliance Intelligence & Surprise Inspection Platform
+
+Purpose:
+
+An AI-assisted continuous monitoring and adaptive surprise-inspection platform for DoSJE-funded institutes, projects and NGOs.
+
+Core loop:
+
+MONITOR
+→ DETECT ANOMALY
+→ CALCULATE RISK
+→ PRIORITIZE
+→ GENERATE SURPRISE INSPECTION
+→ GPS + EVIDENCE VERIFICATION
+→ UPDATE RISK
+→ ESCALATE
+
+The MVP should feel like a real government compliance command platform rather than a generic admin dashboard.
+
+==================================================
+MAIN APPLICATION NAVIGATION
+==================================================
+
+Create a persistent responsive sidebar/navigation with these options:
+
+1. Command Centre
+2. Institutes
+3. Monitoring
+4. Inspection Queue
+5. Inspector Field App
+6. Risk Analytics
+7. Evidence & Reports
+8. System Settings
+
+Each option must actually work.
+
+No dead buttons.
+No fake navigation.
+Every page should display useful data from the existing API/mock data.
+
+==================================================
+1. COMMAND CENTRE
+==================================================
+
+Route:
+
+/
+
+This is the main government officer dashboard.
+
+Top section:
+
+COMPLIANCE INTELLIGENCE COMMAND
+
+Subtitle:
+
+AI-Assisted Continuous Monitoring & Adaptive Surprise Inspection Platform
+
+Display four major risk counters:
+
+CRITICAL
+HIGH
+MEDIUM
+LOW
+
+Calculate these dynamically from institute data.
+
+Below that show:
+
+TOTAL INSTITUTES
+ACTIVE ALERTS
+PENDING INSPECTIONS
+COMPLETED INSPECTIONS
+
+==================================================
+TOP PRIORITY PANEL
+==================================================
+
+Create a large:
+
+TOP INSPECTION PRIORITIES
+
+section.
+
+Sort institutes by riskScore descending.
+
+Display:
+
+Institute
+Location
+Risk score
+Risk level
+Status
+Primary trigger
+
+Use strong visual hierarchy:
+
+CRITICAL > HIGH > MEDIUM > LOW
+
+Clicking an institute opens its detail view.
+
+==================================================
+HERO CASE
+==================================================
+
+Make:
+
+Saksham Rehabilitation Centre
+
+the main demonstration institute.
+
+Initial state:
+
+Risk = 42
+Reported attendance = 86
+Observed attendance = unavailable
+Status = MONITORING
+
+Create a highly visible:
+
+RUN MONITORING
+
+button.
+
+When clicked:
+
+1. Call the existing monitoring API.
+2. Simulate observed attendance = 41.
+3. Calculate discrepancy.
+4. Display:
+
+Reported Attendance: 86
+AI Observed Attendance: 41
+Discrepancy: 52.3%
+Anomaly: SEVERE
+
+5. Animate the risk transition:
+
+42 → 81
+
+6. Display:
+
+CRITICAL RISK
+
+7. Display:
+
+INSPECTION REQUIRED
+
+Do not fake the result purely in the frontend.
+Use the existing backend risk engine.
+
+==================================================
+RISK BREAKDOWN
+==================================================
+
+For the selected institute display:
+
+Attendance anomaly
+Historical behaviour
+Reporting inconsistency
+Compliance
+Alerts
+
+Show:
+
+points / maximum points
+
+Example:
+
+Attendance anomaly       35 / 35
+Historical behaviour     15 / 15
+Reporting inconsistency  13 / 13
+Compliance               10 / 10
+Alerts                    8 / 8
+
+Total:
+
+81 / 100
+
+Create a clean horizontal risk contribution visualization.
+
+==================================================
+2. INSTITUTES
+==================================================
+
+Create route:
+
+/institutes
+
+Display all institutes in a professional table/card interface.
+
+Columns:
+
+Institute
+Location
+Reported Attendance
+Observed Attendance
+Discrepancy
+Risk
+Risk Level
+Status
+Last Monitoring
+Action
+
+Add:
+
+Search
+Risk filter
+Status filter
+Sort by risk
+Sort by name
+
+Clicking an institute opens:
+
+/institutes/:id
+
+==================================================
+INSTITUTE DETAIL
+==================================================
+
+Create a detailed institute page.
+
+Show:
+
+Institute name
+Location
+Current risk score
+Risk level
+Status
+Reported attendance
+Observed attendance
+Discrepancy
+Risk breakdown
+Last monitoring time
+Last inspection
+Inspection history
+
+Show a:
+
+RISK EVENT TIMELINE
+
+Example:
+
+Attendance anomaly detected
+Risk increased
+Inspection generated
+Inspector assigned
+GPS verified
+Evidence submitted
+Finding confirmed
+Risk escalated
+
+Use actual available data wherever possible.
+
+==================================================
+3. MONITORING
+==================================================
+
+Create route:
+
+/monitoring
+
+Purpose:
+
+Continuous monitoring console.
+
+Display:
+
+Selected institute
+Reported attendance
+AI observed attendance
+Discrepancy
+Anomaly severity
+Risk score
+Risk level
+
+Include a CCTV-style monitoring panel.
+
+For MVP use a prerecorded/simulated video input.
+
+DO NOT require real CCTV infrastructure.
+
+If no video is available, create a professional monitoring placeholder that clearly says:
+
+SIMULATED CCTV FEED
+
+Show:
+
+PERSONS DETECTED
+41
+
+This represents the future YOLO observation layer.
+
+Include:
+
+RUN MONITORING
+
+button.
+
+The architecture must make it obvious that:
+
+CCTV/video
+→ YOLO
+→ observed attendance
+→ risk engine
+
+will be used in production.
+
+==================================================
+4. INSPECTION QUEUE
+==================================================
+
+Create route:
+
+/inspections
+
+This is one of the most important screens.
+
+Display:
+
+INSPECTION PRIORITY QUEUE
+
+Sort by:
+
+1. Risk score
+2. Severity
+3. Age of unresolved alert
+
+Each inspection should show:
+
+Priority
+Institute
+Risk
+Reason
+Inspector
+Status
+Created
+Action
+
+Statuses:
+
+ASSIGNED
+IN PROGRESS
+SUBMITTED
+COMPLETED
+ESCALATED
+
+Add button:
+
+GENERATE SURPRISE INSPECTION
+
+When clicked:
+
+Use the existing inspection engine.
+
+The system should:
+
+1. Identify eligible institutes.
+2. Prioritize high-risk institutes.
+3. Use risk-weighted/randomized selection.
+4. Select an available inspector.
+5. Create an inspection.
+6. Update institute status.
+7. Return the inspection.
+
+For the hero demo:
+
+Saksham Rehabilitation Centre
+Risk 81
+Inspector PMU-07
+Reason: Attendance anomaly
+
+should be the first assignment.
+
+==================================================
+5. INSPECTOR FIELD APP
+==================================================
+
+Route:
+
+/inspector
+
+Make this mobile-first.
+
+It should look like a field inspection application rather than a desktop dashboard.
+
+Display:
+
+ASSIGNED INSPECTION
+
+Institute
+Address/location
+Risk score
+Reason
+Inspector ID
+Inspection status
+
+Then create:
+
+STEP 1 — VERIFY LOCATION
+
+Button:
+
+VERIFY GPS LOCATION
+
+Use:
+
+navigator.geolocation
+
+Display:
+
+GPS STATUS
+LOCATION VERIFIED
+
+Capture:
+
+latitude
+longitude
+
+For MVP, do not implement complex geofencing.
+
+==================================================
+STEP 2 — INSPECTION
+==================================================
+
+Display checklist:
+
+Attendance verified
+Staff presence verified
+Documents checked
+Facility condition checked
+Beneficiary presence checked
+
+Allow the inspector to mark items.
+
+==================================================
+STEP 3 — EVIDENCE
+==================================================
+
+Create:
+
+TAKE / UPLOAD EVIDENCE
+
+Use:
+
+<input type="file" accept="image/*" capture="environment">
+
+Show selected image preview.
+
+Store the evidence reference in the existing inspection submission model.
+
+Do not implement complex image processing.
+
+==================================================
+STEP 4 — FINDING
+==================================================
+
+Provide:
+
+ANOMALY CONFIRMED
+ANOMALY NOT CONFIRMED
+
+Notes field.
+
+Submit button:
+
+SUBMIT INSPECTION
+
+Use the existing inspection submission API.
+
+==================================================
+CONFIRMED INSPECTION
+==================================================
+
+If anomaly is confirmed:
+
+Increase risk by +13.
+
+Hero case:
+
+81 → 94
+
+Then show:
+
+CRITICAL
+
+NON-COMPLIANT
+
+ESCALATION REQUIRED
+
+==================================================
+UNCONFIRMED INSPECTION
+==================================================
+
+If anomaly is not confirmed:
+
+Decrease risk by 20.
+
+Never allow risk below 0.
+
+Then return institute to monitoring state unless another rule requires inspection.
+
+==================================================
+6. RISK ANALYTICS
+==================================================
+
+Create:
+
+/analytics
+
+Display:
+
+Risk distribution
+Institutes by risk level
+Average risk score
+Anomalies detected
+Inspections generated
+Confirmed anomalies
+Escalations
+
+Create clean charts.
+
+Use the existing project charting approach if available.
+
+Do not introduce a huge chart library unnecessarily.
+
+Also create:
+
+RISK TREND
+
+showing risk changes for the selected institute.
+
+For the hero case visualize:
+
+42
+↓
+81
+↓
+94
+
+==================================================
+7. EVIDENCE & REPORTS
+==================================================
+
+Create:
+
+/evidence
+
+Display inspection evidence records.
+
+Columns/cards:
+
+Institute
+Inspection
+Inspector
+Timestamp
+GPS status
+Evidence
+Finding
+Risk before
+Risk after
+Escalation
+
+Click an evidence record to open a detail panel.
+
+Show:
+
+Photo
+GPS coordinates
+Inspection notes
+Finding
+Risk transition
+
+Create a button:
+
+VIEW INSPECTION REPORT
+
+The report can be displayed as a clean on-screen report for the MVP.
+
+Do not implement PDF generation yet unless it already exists.
+
+==================================================
+8. SYSTEM SETTINGS
+==================================================
+
+Create:
+
+/settings
+
+Display configuration information:
+
+Risk thresholds:
+
+LOW       0–29
+MEDIUM    30–59
+HIGH      60–79
+CRITICAL  80–100
+
+Attendance anomaly thresholds:
+
+NORMAL     <10%
+LOW        10–19.9%
+MODERATE   20–34.9%
+SERIOUS    35–49.9%
+SEVERE     >=50%
+
+Risk weights:
+
+Attendance anomaly       35
+Historical behaviour     15
+Reporting inconsistency  13
+Compliance               10
+Alerts                    8
+
+Also display:
+
+System status
+API status
+Data mode: MOCK / SIMULATION
+AI mode: SIMULATED
+
+Clearly label that:
+
+CCTV
+YOLO
+persistent database
+authentication
+
+are not yet connected.
+
+==================================================
+GLOBAL RISK SYSTEM
+==================================================
+
+Use the existing riskEngine.
+
+Do NOT duplicate risk calculations in React.
+
+All risk calculations must remain backend-side.
+
+The frontend should consume:
+
+riskScore
+riskLevel
+discrepancy
+anomalyDetected
+anomalySeverity
+risk breakdown
+
+through the API.
+
+==================================================
+GLOBAL INSPECTION SYSTEM
+==================================================
+
+Use the existing inspectionEngine.
+
+Do NOT implement separate inspection assignment logic inside individual React pages.
+
+All inspection creation/submission must use the API.
+
+==================================================
+DATA CONSISTENCY
+==================================================
+
+Every page must use the same underlying institute state.
+
+Example:
+
+If dashboard changes Saksham:
+
+42 → 81
+
+then Institutes page must show 81.
+
+If inspection confirms the anomaly:
+
+81 → 94
+
+then:
+
+Dashboard = 94
+Institute detail = 94
+Inspection = completed
+Status = NON_COMPLIANT
+Analytics = updated
+Evidence = visible
+
+Do not create independent frontend-only copies of institute data.
+
+==================================================
+RESPONSIVE DESIGN
+==================================================
+
+Desktop:
+
+Government command-center experience.
+
+Mobile:
+
+Inspector field application.
+
+The sidebar should collapse on smaller screens.
+
+Tables should become cards on mobile.
+
+Buttons must be touch-friendly.
+
+==================================================
+VISUAL DESIGN
+==================================================
+
+Use a professional government command-center aesthetic.
+
+Dark/neutral interface.
+
+Strong hierarchy.
+
+Minimal unnecessary decoration.
+
+Use:
+
+RED for critical
+ORANGE for high
+YELLOW for medium
+GREEN for low
+
+but do not make the entire UI colorful.
+
+Use color primarily for risk communication.
+
+Make the application look suitable for a serious compliance monitoring system.
+
+==================================================
+LOADING / ERROR STATES
+==================================================
+
+Every API operation must have:
+
+Loading state
+Success state
+Error state
+
+Do not leave blank screens when an API fails.
+
+Show useful error messages.
+
+==================================================
+DEMO MODE
+==================================================
+
+Create a clear DEMO MODE indicator.
+
+The hero demonstration must work reliably.
+
+The exact flow:
+
+START
+
+Saksham Rehabilitation Centre
+Risk = 42
+Reported attendance = 86
+
+↓
+
+RUN MONITORING
+
+↓
+
+AI observed attendance = 41
+
+↓
+
+Discrepancy = 52.3%
+
+↓
+
+SEVERE ANOMALY
+
+↓
+
+Risk = 81
+
+↓
+
+CRITICAL
+
+↓
+
+GENERATE SURPRISE INSPECTION
+
+↓
+
+PMU-07 assigned
+
+↓
+
+Inspector opens /inspector
+
+↓
+
+GPS verified
+
+↓
+
+Evidence uploaded
+
+↓
+
+Anomaly confirmed
+
+↓
+
+SUBMIT INSPECTION
+
+↓
+
+Risk = 94
+
+↓
+
+NON-COMPLIANT
+
+↓
+
+ESCALATION REQUIRED
+
+This exact flow must work end-to-end.
+
+==================================================
+AI / YOLO ARCHITECTURE
+==================================================
+
+Do not train a model.
+
+Do not require a GPU.
+
+Keep the current simulated observation.
+
+Create a clean abstraction/interface for future:
+
+MonitoringProvider
+
+Current implementation:
+
+SimulatedMonitoringProvider
+
+Future implementation:
+
+YOLOMonitoringProvider
+
+The rest of the application must only care about:
+
+observedAttendance
+confidence
+modelVersion
+inferenceTimestamp
+
+This will allow real YOLO inference to be plugged in later.
+
+==================================================
+DATABASE ARCHITECTURE
+==================================================
+
+Keep the current mock/in-memory mode working.
+
+Do not break the application by requiring Supabase immediately.
+
+However, structure the data-access layer so it can later be replaced with PostgreSQL/Supabase.
+
+Do not move business logic into React.
+
+==================================================
+API
+==================================================
+
+Preserve the existing OpenAPI contract.
+
+If a new endpoint is genuinely required:
+
+1. Update lib/api-spec/openapi.yaml
+2. Regenerate API clients
+3. Update backend route
+4. Update frontend API usage
+
+Do not manually modify generated files unless absolutely necessary.
+
+==================================================
+CODE QUALITY
+==================================================
+
+Before finishing:
+
+Run:
+
+pnpm run typecheck
+
+and:
+
+pnpm run build
+
+Fix all TypeScript errors.
+
+Do not leave TODOs for functionality that is required for the MVP.
+
+Do not create fake functionality.
+
+==================================================
+FINAL CHECK
+==================================================
+
+Before stopping, verify these pages:
+
+/
+/institutes
+/monitoring
+/inspections
+/inspector
+/analytics
+/evidence
+/settings
+
+Verify that navigation works.
+
+Verify that the hero case works:
+
+42 → 81 → 94
+
+Verify that data remains consistent across pages.
+
+Verify:
+
+pnpm run typecheck
+
+passes.
+
+Verify:
+
+pnpm run build
+
+passes.
+
+Finally, give me a concise report containing:
+
+1. Files created
+2. Files modified
+3. Routes created
+4. APIs used
+5. How the risk engine connects to the UI
+6. How the inspection engine connects to the UI
+7. How to run the project in Replit
+8. What remains simulated
+9. The exact next step for Supabase
+10. The exact next step for real YOLO inference
+
+Do not stop after designing the pages.
+
+Actually implement the pages, connect them to the existing API, test the complete flow, and fix errors before finishing.

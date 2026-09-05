@@ -104,7 +104,7 @@ export default function Inspector() {
     <div className="inspector-page">
       <header className="inspector-header">
         <div className="inspector-header-inner">
-          <div className="inspector-topline"><Link href="/" className="mobile-only-back" data-testid="link-return-dashboard-inspector"><ArrowLeft size={13} /> Civic Signal</Link><span>Assigned inspection · {assigned.id}</span></div>
+          <div className="inspector-topline"><Link href="/" className="mobile-only-back" data-testid="link-return-dashboard-inspector"><ArrowLeft size={13} /> Civic Signal</Link><span>DEMO MODE / MOCK-SIMULATION · Assigned inspection · {assigned.id}</span></div>
           <h1 className="inspector-title">Verify the signal.</h1>
           <p className="inspector-subtitle">Capture what happened on the ground. Every field is part of the record.</p>
         </div>

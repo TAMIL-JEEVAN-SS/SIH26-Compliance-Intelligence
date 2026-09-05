@@ -4,13 +4,18 @@ import {
   Activity,
   AlertTriangle,
   ArrowUpRight,
+  BarChart3,
+  Building2,
   ClipboardCheck,
   Crosshair,
   FileWarning,
+  Files,
+  ListChecks,
   MapPin,
   Radar,
   RefreshCw,
   ShieldCheck,
+  Settings2,
   Target,
 } from 'lucide-react';
 import {
@@ -69,10 +74,17 @@ function Shell({ children }: { children: ReactNode }) {
             <span className="brand-subtitle">Compliance command</span>
           </div>
         </div>
+        <div className="demo-mode"><span className="status-dot" /> DEMO MODE / MOCK-SIMULATION</div>
         <div className="nav-label">Operations</div>
         <nav className="nav-list">
           <Link href="/" className="nav-item active" data-testid="link-dashboard"><Radar {...iconProps} /> Command dashboard</Link>
+          <Link href="/institutes" className="nav-item" data-testid="link-dashboard-institutes"><Building2 {...iconProps} /> Institutes</Link>
+          <Link href="/monitoring" className="nav-item" data-testid="link-dashboard-monitoring"><Activity {...iconProps} /> Monitoring</Link>
+          <Link href="/inspections" className="nav-item" data-testid="link-dashboard-inspections"><ListChecks {...iconProps} /> Inspection queue</Link>
           <Link href="/inspector" className="nav-item" data-testid="link-inspector"><ClipboardCheck {...iconProps} /> Inspector view</Link>
+          <Link href="/analytics" className="nav-item" data-testid="link-dashboard-analytics"><BarChart3 {...iconProps} /> Risk analytics</Link>
+          <Link href="/evidence" className="nav-item" data-testid="link-dashboard-evidence"><Files {...iconProps} /> Evidence & reports</Link>
+          <Link href="/settings" className="nav-item" data-testid="link-dashboard-settings"><Settings2 {...iconProps} /> System settings</Link>
         </nav>
         <div className="rail-footer">
           <div className="rail-status"><span className="status-dot" /> Systems operational</div>
@@ -82,6 +94,9 @@ function Shell({ children }: { children: ReactNode }) {
       <main className="main-area">{children}</main>
       <nav className="mobile-nav" aria-label="Mobile navigation">
         <Link href="/" className="nav-item active" data-testid="mobile-link-dashboard"><Radar {...iconProps} /> Dashboard</Link>
+        <Link href="/institutes" className="nav-item" data-testid="mobile-link-dashboard-institutes"><Building2 {...iconProps} /> Institutes</Link>
+        <Link href="/monitoring" className="nav-item" data-testid="mobile-link-dashboard-monitoring"><Activity {...iconProps} /> Monitor</Link>
+        <Link href="/inspections" className="nav-item" data-testid="mobile-link-dashboard-inspections"><ListChecks {...iconProps} /> Queue</Link>
         <Link href="/inspector" className="nav-item" data-testid="mobile-link-inspector"><ClipboardCheck {...iconProps} /> Inspector</Link>
       </nav>
     </div>
@@ -251,6 +266,9 @@ export default function Dashboard() {
     high: institutes.filter((item) => item.riskLevel === 'HIGH').length,
     medium: institutes.filter((item) => item.riskLevel === 'MEDIUM').length,
     low: institutes.filter((item) => item.riskLevel === 'LOW').length,
+    activeAlerts: institutes.filter((item) => item.riskScore >= 60).length,
+    pendingInspections: inspections.filter((item) => item.assignmentStatus === 'ASSIGNED').length,
+    completedInspections: inspections.filter((item) => item.assignmentStatus === 'SUBMITTED').length,
   }), [institutes]);
 
   const refresh = () => {
@@ -293,6 +311,12 @@ export default function Dashboard() {
               <MetricCard label="High" value={stats.high} note="Inspection eligible" accent />
               <MetricCard label="Medium" value={stats.medium} note="Continue monitoring" />
               <MetricCard label="Low" value={stats.low} note="Within normal range" />
+            </div>
+            <div className="metric-grid secondary-metric-grid animate-enter" style={{ animationDelay: '.03s' }}>
+              <MetricCard label="Total institutes" value={institutes.length} note="Connected programs" />
+              <MetricCard label="Active alerts" value={stats.activeAlerts} note="Risk at 60 or above" accent />
+              <MetricCard label="Pending inspections" value={stats.pendingInspections} note="Awaiting field action" />
+              <MetricCard label="Completed inspections" value={stats.completedInspections} note="Submitted findings" />
             </div>
             <div className="content-grid">
               <div className="detail-stack">

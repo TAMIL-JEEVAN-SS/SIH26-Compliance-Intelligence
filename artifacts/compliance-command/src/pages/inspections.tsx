@@ -1,0 +1,24 @@
+import { useMemo, useState } from 'react';
+import { ClipboardCheck, RefreshCw, Target } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { getListInspectionsQueryKey, getListInstitutesQueryKey, useGenerateInspection, useListInspections, useListInstitutes } from '@workspace/api-client-react';
+import { ErrorState, LoadingRows, PageFrame, Section, StatusBadge } from '@/components/command-ui';
+import { Link } from 'wouter';
+
+function dateLabel(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(date);
+}
+
+export default function Inspections() {
+  const inspectionsQuery = useListInspections();
+  const institutesQuery = useListInstitutes();
+  const generate = useGenerateInspection();
+  const client = useQueryClient();
+  const [filter, setFilter] = useState('ALL');
+  const [selectedInstitute, setSelectedInstitute] = useState('');
+  const inspections = inspectionsQuery.data ?? [];
+  const visible = useMemo(() => filter === 'ALL' ? inspections : inspections.filter((item) => item.assignmentStatus === filter), [filter, inspections]);
+  const create = () => generate.mutate({ data: selectedInstitute ? { instituteId: selectedInstitute } : undefined }, { onSuccess: () => { void client.invalidateQueries({ queryKey: getListInspectionsQueryKey() }); void client.invalidateQueries({ queryKey: getListInstitutesQueryKey() }); } });
+  return <PageFrame eyebrow="Field operations / 04" title="Inspection queue" description="Generate and track surprise assignments without losing the chain of evidence." actions={<Link href="/inspector" className="button button-outline" data-testid="link-open-field-app"><ClipboardCheck size={14} /> Open field app</Link>}><Section title="Assignment generator" caption="The inspection engine selects the highest-priority eligible target"><div className="queue-action"><div><div className="eyebrow">Next dispatch</div><strong>{selectedInstitute ? institutesQuery.data?.find((item) => item.id === selectedInstitute)?.name : 'Automatic priority selection'}</strong><p>PMU-07 routing and inspector availability are resolved by the backend.</p></div><div className="queue-controls"><select className="input" value={selectedInstitute} onChange={(event) => setSelectedInstitute(event.target.value)} data-testid="select-inspection-institute"><option value="">Highest priority eligible institute</option>{(institutesQuery.data ?? []).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><button className="button button-amber" onClick={create} disabled={generate.isPending} data-testid="button-generate-inspection">{generate.isPending ? <RefreshCw size={14} className="animate-spin" /> : <Target size={14} />} {generate.isPending ? 'Generating…' : 'Generate surprise inspection'}</button></div></div>{generate.isError && <div className="result-callout" data-testid="error-generate-queue"><strong>Generation unavailable</strong><span>No assignment was created. Retry when the queue is ready.</span></div>}</Section><Section title="Active and submitted records" caption={`${visible.length} records`} action={<select className="input compact-select" value={filter} onChange={(event) => setFilter(event.target.value)} data-testid="select-inspection-filter"><option value="ALL">All states</option><option value="ASSIGNED">Assigned</option><option value="SUBMITTED">Submitted</option></select>}>{inspectionsQuery.isLoading ? <LoadingRows /> : inspectionsQuery.isError ? <ErrorState message="Inspection queue could not be loaded." onRetry={() => void inspectionsQuery.refetch()} /> : visible.length === 0 ? <div className="empty-state" data-testid="state-empty-inspections">No records in this queue yet. Generate a surprise inspection to begin.</div> : <div className="queue-list">{visible.map((inspection) => <div className="queue-row" key={inspection.id} data-testid={`row-inspection-${inspection.id}`}><div className="queue-marker"><span>{inspection.assignmentStatus === 'ASSIGNED' ? 'OPEN' : 'FILED'}</span></div><div className="queue-main"><strong>{inspection.institute.name}</strong><span>{inspection.reason}</span><small>{inspection.inspector} · {dateLabel(inspection.timestamp)}</small></div><div className="queue-score"><strong>{inspection.riskScore.toFixed(0)}</strong><StatusBadge level={inspection.assignmentStatus} /></div><Link href={inspection.assignmentStatus === 'ASSIGNED' ? '/inspector' : '/evidence'} className="button button-outline table-button" data-testid={`link-inspection-action-${inspection.id}`}>{inspection.assignmentStatus === 'ASSIGNED' ? 'Open field app' : 'View evidence'}</Link></div>)}</div>}</Section></PageFrame>;
+}

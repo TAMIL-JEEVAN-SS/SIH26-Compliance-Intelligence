@@ -6,6 +6,13 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import Dashboard from '@/pages/dashboard';
 import Inspector from '@/pages/inspector';
+import Institutes from '@/pages/institutes';
+import InstituteDetail from '@/pages/institute-detail';
+import Monitoring from '@/pages/monitoring';
+import Inspections from '@/pages/inspections';
+import Analytics from '@/pages/analytics';
+import Evidence from '@/pages/evidence';
+import Settings from '@/pages/settings';
 import {
   Route,
   Switch,
@@ -22,7 +29,14 @@ function Router() {
     <RoutedErrorBoundary>
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/institutes" component={Institutes} />
+        <Route path="/institutes/:id" component={InstituteDetail} />
+        <Route path="/monitoring" component={Monitoring} />
+        <Route path="/inspections" component={Inspections} />
         <Route path="/inspector" component={Inspector} />
+        <Route path="/analytics" component={Analytics} />
+        <Route path="/evidence" component={Evidence} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
